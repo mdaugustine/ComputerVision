@@ -74,8 +74,7 @@ void runOnWindow(int W1, int H1, int W2, int H2, Mat inputImage, char *outName) 
 	double k = 101.0;
 	for (int i = 0; i < 101; i++)
 	{
-		//If we are on the first histogram item, then there is no i - 1. So we just take the h(i) value.
-		//otherwise do the actual formula
+		//If we are on h(0) then there is no h(i-1) so just use h(0)
 		if (i > 0)
 		{
 			LPixelsum[i] = LPixelsum[i - 1] + LHistogram[i];
@@ -126,7 +125,7 @@ void runOnWindow(int W1, int H1, int W2, int H2, Mat inputImage, char *outName) 
 }
 
 int main(int argc, char** argv) {
-	/*
+	
 	if (argc != 7) {
 	cerr << argv[0] << ": "
 	<< "got " << argc - 1
@@ -141,13 +140,13 @@ int main(int argc, char** argv) {
 	double h2 = atof(argv[4]);
 	char *inputName = argv[5];
 	char *outputName = argv[6];
-	*/
-	double w1 = .3;
+
+	/*(double w1 = .3;
 	double h1 = .3;
 	double w2 = .8;
 	double h2 = .8;
 	char *inputName = "input.jpg";
-	char *outputName = "output.jpg";
+	char *outputName = "output.jpg"; */
 
 	if (w1<0 || h1<0 || w2 <= w1 || h2 <= h1 || w2>1 || h2>1) {
 		cerr << " arguments must satisfy 0 <= w1 < w2 <= 1"

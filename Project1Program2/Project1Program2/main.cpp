@@ -77,9 +77,9 @@ void runOnWindow(int W1, int H1, int W2, int H2, Mat inputImage, char *outName) 
 
 	for (int i = 0; i < 101; i++)
 	{
-		//if max and min are equal then just set all pixels to be the same
-		if (max - min == 0)
-			LLookupTable[i] = min;
+		//if max == min, then no transformation happens.
+		if (max == min)
+			LLookupTable[i] = i;
 		else
 			LLookupTable[i] = ((i - min) * 100) / (max - min);
 	}
@@ -122,7 +122,7 @@ void runOnWindow(int W1, int H1, int W2, int H2, Mat inputImage, char *outName) 
 }
 
 int main(int argc, char** argv) {
-	/*
+	
 	if (argc != 7) {
 		cerr << argv[0] << ": "
 			<< "got " << argc - 1
@@ -137,13 +137,16 @@ int main(int argc, char** argv) {
 	double h2 = atof(argv[4]);
 	char *inputName = argv[5];
 	char *outputName = argv[6];
-	*/
+	
+
+	/*
 	double w1 = .3;
 	double h1 = .3;
 	double w2 = .8;
 	double h2 = .8;
-	char *inputName = "Dark_forest.jpg";
+	char *inputName = "input.jpg";
 	char *outputName = "output.jpg";
+	*/
 
 	if (w1<0 || h1<0 || w2 <= w1 || h2 <= h1 || w2>1 || h2>1) {
 		cerr << " arguments must satisfy 0 <= w1 < w2 <= 1"
@@ -201,7 +204,6 @@ tuple<double, double, double> LuvToXYZ(double L, double u, double v)
 	else
 		Y = (L / 903.3) * Yw;
 
-	// if vprime is 0 then set the results to 0
 	if (vprime == 0)
 	{
 		X = 0;
@@ -266,7 +268,6 @@ tuple<double, double, double> RGBtoXYZ(int R, int G, int B)
 	for (int n = 0; n < 3; n++)
 	{
 		XYZ[n] = convert[n][0] * Rgamma + convert[n][1] * Ggamma + convert[n][2] * Bgamma;
-		//make sure the values are within 0 to 1
 		if (XYZ[n] < 0)
 			XYZ[n] = 0;
 		if (XYZ[n] > 1)
@@ -292,7 +293,6 @@ tuple<int, int, int> XYZtoRGB(double X, double Y, double Z)
 	for (int n = 0; n < 3; n++)
 	{
 		linearRGB[n] = convert[n][0] * X + convert[n][1] * Y + convert[n][2] * Z;
-		//make sure the values are within 0 to 1
 		if (linearRGB[n] < 0)
 			linearRGB[n] = 0;
 		if (linearRGB[n] > 1)

@@ -5,14 +5,81 @@ using namespace cv;
 using namespace std;
 
 void runOnWindow(int W1, int H1, int W2, int H2, Mat inputImage, char *outName) {
+	int rows = inputImage.rows;
+	int cols = inputImage.cols;
 
 	Mat luvimage(inputImage);
 	cvtColor(luvimage, luvimage, CV_BGR2Luv);
 	vector<Mat> Luv_planes;
 	split(luvimage, Luv_planes);
-	equalizeHist(Luv_planes[0], Luv_planes[0]);
-	merge(Luv_planes, luvimage);
-	Mat outImage(luvimage);
+	Mat iL = Luv_planes[0];
+	Mat iu = Luv_planes[1];
+	Mat iv = Luv_planes[2];
+
+	// dynamically allocate RGB arrays of size rows x cols
+	double** L = new double*[rows];
+	double** u = new double*[rows];
+	double** v = new double*[rows];
+	for (int i = 0; i < rows; i++) {
+		L[i] = new double[cols];
+		u[i] = new double[cols];
+		v[i] = new double[cols];
+	}
+
+	for (int i = 0; i < rows; i++)
+		for (int j = 0; j < cols; j++) {
+			L[i][j] = iL.at<uchar>(i, j);
+			u[i][j] = iu.at<uchar>(i, j);
+			v[i][j] = iv.at<uchar>(i, j);
+		}
+
+
+	//	   The transformation should be based on the
+	//	   historgram of the pixels in the W1,W2,H1,H2 range.
+	//	   The following code goes over these pixels
+
+	int LLookupTable[101];
+	int min = 102;
+	int max = -1;
+
+	for (int i = H1; i <= H2; i++)
+		for (int j = W1; j <= W2; j++) {
+			double Lwin = L[i][j];
+
+			if (Lwin < min)
+				min = Lwin;
+			else if (Lwin > max)
+				max = Lwin;
+		}
+
+	for (int i = 0; i < 101; i++)
+	{
+		//if max == min, then no transformation happens.
+		if (max == min)
+			LLookupTable[i] = i;
+		else
+			LLookupTable[i] = ((i - min) * 100) / (max - min);
+	}
+
+
+	for (int i = H1; i <= H2; i++)
+		for (int j = W1; j <= W2; j++) {
+			L[i][j] = LLookupTable[(int)round(L[i][j])];
+		}
+
+	Mat oR(rows, cols, CV_8UC1);
+	Mat oG(rows, cols, CV_8UC1);
+	Mat oB(rows, cols, CV_8UC1);
+	for (int i = 0; i < rows; i++)
+		for (int j = 0; j < cols; j++) {
+			iL.at<uchar>(i, j) = L[i][j];;
+			iu.at<uchar>(i, j) = u[i][j];;
+			iv.at<uchar>(i, j) = v[i][j];;
+		}
+
+	Mat o_planes[] = { iL, iu, iv };
+	Mat outImage;
+	merge(o_planes, 3, outImage);
 	cvtColor(outImage, outImage, CV_Luv2BGR);
 
 	namedWindow("output", CV_WINDOW_AUTOSIZE);
@@ -21,14 +88,13 @@ void runOnWindow(int W1, int H1, int W2, int H2, Mat inputImage, char *outName) 
 }
 
 int main(int argc, char** argv) {
-	/*
 	if (argc != 7) {
-	cerr << argv[0] << ": "
-	<< "got " << argc - 1
-	<< " arguments. Expecting six: w1 h1 w2 h2 ImageIn ImageOut."
-	<< endl;
-	cerr << "Example: proj1b 0.2 0.1 0.8 0.5 fruits.jpg out.bmp" << endl;
-	return(-1);
+		cerr << argv[0] << ": "
+			<< "got " << argc - 1
+			<< " arguments. Expecting six: w1 h1 w2 h2 ImageIn ImageOut."
+			<< endl;
+		cerr << "Example: proj1b 0.2 0.1 0.8 0.5 fruits.jpg out.bmp" << endl;
+		return(-1);
 	}
 	double w1 = atof(argv[1]);
 	double h1 = atof(argv[2]);
@@ -36,13 +102,6 @@ int main(int argc, char** argv) {
 	double h2 = atof(argv[4]);
 	char *inputName = argv[5];
 	char *outputName = argv[6];
-	*/
-	double w1 = .3;
-	double h1 = .3;
-	double w2 = .8;
-	double h2 = .8;
-	char *inputName = "input.jpg";
-	char *outputName = "output.jpg";
 
 	if (w1<0 || h1<0 || w2 <= w1 || h2 <= h1 || w2>1 || h2>1) {
 		cerr << " arguments must satisfy 0 <= w1 < w2 <= 1"

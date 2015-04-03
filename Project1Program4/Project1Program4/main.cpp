@@ -62,13 +62,16 @@ void runOnWindow(int W1, int H1, int W2, int H2, Mat inputImage, char *outName) 
 		tie(X, Y, Z) = RGBtoXYZ(r, g, b);
 		tie(x, y, Y) = XYZtoxyY(X, Y, Z);
 
-		//Multiply all the values by 100 so they can be stored as integers
-		//Otherwise we will end up with only 1s and 0s
-		//Also storing a histogram of Y would require an infinitely large 2 dimensional array.
-		//Multiplying by 100 allows us to store it in an array of size 101 with only minimal decimal truncation.
-		R[i][j] = (int)round(x * 100.0);
-		G[i][j] = (int)round(y * 100.0);
-		B[i][j] = (int)round(Y * 100.0);
+		/*
+		Multiply all the values by 100 so they can be stored as integers
+		otherwise we will end up with only 1s and 0s
+		Also storing a histogram of Y would require an infinitely large 2 dimensional aray.
+		Multiplying by 100 allows us to store it in an array of size 101 with only minimal
+		decimal truncation
+		*/
+		R[i][j] = (double)round(x * 100.0);
+		G[i][j] = (double)round(y * 100.0);
+		B[i][j] = (double)round(Y * 100.0);
 
 		YHistogram[(int)round(Y * 100.0)]++;
 
@@ -81,7 +84,11 @@ void runOnWindow(int W1, int H1, int W2, int H2, Mat inputImage, char *outName) 
 
 	for (int i = 0; i < 101; i++)
 	{
-		YLookupTable[i] = ((i - min) * 100.0) / (max - min);
+		//if max == min, then no transformation happens.
+		if (max == min)
+			YLookupTable[i] = i;
+		else
+			YLookupTable[i] = ((i - min) * 100) / (max - min);
 	}
 
 	for (int i = H1; i <= H2; i++)
@@ -122,7 +129,7 @@ void runOnWindow(int W1, int H1, int W2, int H2, Mat inputImage, char *outName) 
 }
 
 int main(int argc, char** argv) {
-	/*
+	
 	if (argc != 7) {
 	cerr << argv[0] << ": "
 	<< "got " << argc - 1
@@ -137,13 +144,13 @@ int main(int argc, char** argv) {
 	double h2 = atof(argv[4]);
 	char *inputName = argv[5];
 	char *outputName = argv[6];
-	*/
-	double w1 = .3;
+	
+	/*double w1 = .3;
 	double h1 = .3;
 	double w2 = .8;
 	double h2 = .8;
 	char *inputName = "Dark_forest.jpg";
-	char *outputName = "output.jpg";
+	char *outputName = "output.jpg";*/
 
 	if (w1<0 || h1<0 || w2 <= w1 || h2 <= h1 || w2>1 || h2>1) {
 		cerr << " arguments must satisfy 0 <= w1 < w2 <= 1"
