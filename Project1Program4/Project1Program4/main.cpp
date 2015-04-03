@@ -62,9 +62,13 @@ void runOnWindow(int W1, int H1, int W2, int H2, Mat inputImage, char *outName) 
 		tie(X, Y, Z) = RGBtoXYZ(r, g, b);
 		tie(x, y, Y) = XYZtoxyY(X, Y, Z);
 
-		R[i][j] = x * 100.0;
-		G[i][j] = y * 100.0;
-		B[i][j] = Y * 100.0;
+		//Multiply all the values by 100 so they can be stored as integers
+		//Otherwise we will end up with only 1s and 0s
+		//Also storing a histogram of Y would require an infinitely large 2 dimensional array.
+		//Multiplying by 100 allows us to store it in an array of size 101 with only minimal decimal truncation.
+		R[i][j] = (int)round(x * 100.0);
+		G[i][j] = (int)round(y * 100.0);
+		B[i][j] = (int)round(Y * 100.0);
 
 		YHistogram[(int)round(Y * 100.0)]++;
 

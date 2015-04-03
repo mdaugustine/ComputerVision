@@ -74,6 +74,8 @@ void runOnWindow(int W1, int H1, int W2, int H2, Mat inputImage, char *outName) 
 	double k = 101.0;
 	for (int i = 0; i < 101; i++)
 	{
+		//If we are on the first histogram item, then there is no i - 1. So we just take the h(i) value.
+		//otherwise do the actual formula
 		if (i > 0)
 		{
 			LPixelsum[i] = LPixelsum[i - 1] + LHistogram[i];

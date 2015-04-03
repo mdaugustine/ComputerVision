@@ -77,7 +77,11 @@ void runOnWindow(int W1, int H1, int W2, int H2, Mat inputImage, char *outName) 
 
 	for (int i = 0; i < 101; i++)
 	{
-		LLookupTable[i] = ((i - min) * 100) / (max - min);
+		//if max and min are equal then just set all pixels to be the same
+		if (max - min == 0)
+			LLookupTable[i] = min;
+		else
+			LLookupTable[i] = ((i - min) * 100) / (max - min);
 	}
 
 	for (int i = H1; i <= H2; i++)
@@ -197,6 +201,7 @@ tuple<double, double, double> LuvToXYZ(double L, double u, double v)
 	else
 		Y = (L / 903.3) * Yw;
 
+	// if vprime is 0 then set the results to 0
 	if (vprime == 0)
 	{
 		X = 0;
@@ -261,6 +266,7 @@ tuple<double, double, double> RGBtoXYZ(int R, int G, int B)
 	for (int n = 0; n < 3; n++)
 	{
 		XYZ[n] = convert[n][0] * Rgamma + convert[n][1] * Ggamma + convert[n][2] * Bgamma;
+		//make sure the values are within 0 to 1
 		if (XYZ[n] < 0)
 			XYZ[n] = 0;
 		if (XYZ[n] > 1)
@@ -286,6 +292,7 @@ tuple<int, int, int> XYZtoRGB(double X, double Y, double Z)
 	for (int n = 0; n < 3; n++)
 	{
 		linearRGB[n] = convert[n][0] * X + convert[n][1] * Y + convert[n][2] * Z;
+		//make sure the values are within 0 to 1
 		if (linearRGB[n] < 0)
 			linearRGB[n] = 0;
 		if (linearRGB[n] > 1)

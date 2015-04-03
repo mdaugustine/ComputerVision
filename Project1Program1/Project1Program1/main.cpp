@@ -37,12 +37,6 @@ int main(int argc, char** argv) {
 	for (int i = 0; i < height; i++)
 	for (int j = 0; j < width; j++)
 	{
-		double convert[3][3] = 
-		{
-			{3.240479, -1.53715, -0.498535},
-			{-0.969256, 1.875991, 0.041556},
-			{0.055648, -0.204043, 1.057311}
-		};
 
 		int r1, g1, b1;
 		int r2, g2, b2;
@@ -60,6 +54,13 @@ int main(int argc, char** argv) {
 		It should translate xyY to byte sRGB
 		and Luv to byte sRGB
 		*/
+		
+		double convert[3][3] = 
+		{
+			{3.240479, -1.53715, -0.498535},
+			{-0.969256, 1.875991, 0.041556},
+			{0.055648, -0.204043, 1.057311}
+		};
 
 		//Convert xyY to XYZ then to sRGB
 		double X = (x / y) * Y;
@@ -71,6 +72,7 @@ int main(int argc, char** argv) {
 		for (int n = 0; n < 3; n++)
 		{
 			linearRGB[n] = convert[n][0] * X + convert[n][1] * Y + convert[n][2] * Z;
+			//make sure there are no numbers outside the range 0 to 1.
 			if (linearRGB[n] < 0)
 				linearRGB[n] = 0;
 			if (linearRGB[n] > 1)
@@ -105,6 +107,7 @@ int main(int argc, char** argv) {
 		else
 			Y2 = (L / 903.3) * Yw;
 
+		//avoid division by 0 by making the result 0
 		if (vprime == 0)
 		{
 			X2 = 0;
